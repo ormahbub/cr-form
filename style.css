@@ -8,47 +8,36 @@
   --btn-bg: #555555;
 }
 
-/* body {
-  background-color: var(--bg-dark);
-  color: var(--text-main);
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  display: flex;
-  justify-content: center;
-  padding: 40px 20px;
-  margin: 0;
-} */
-
 .registration-card {
   background-color: var(--card-bg);
   width: 100%;
-  max-width: 650px;
-  padding: 30px;
+  max-width: 600px;
+  padding: 40px;
   border-radius: 4px;
+  margin: 20px auto;
+  color: var(--text-main);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* Stepper Styles */
+/* Stepper Layout */
 .stepper {
   display: flex;
   justify-content: space-between;
   margin-bottom: 40px;
-  text-align: center;
 }
-
 .step {
   flex: 1;
-  position: relative;
-  opacity: 0.5;
+  text-align: center;
+  opacity: 0.3;
+  transition: 0.3s;
 }
-
 .step.active {
   opacity: 1;
 }
-
 .circle {
   width: 25px;
   height: 25px;
-  background-color: #444;
+  background: #444;
   border-radius: 50%;
   margin: 0 auto 10px;
   display: flex;
@@ -57,83 +46,61 @@
   font-size: 12px;
   font-weight: bold;
 }
-
 .step.active .circle {
-  background-color: #666;
+  background: #666;
 }
-
 .label {
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.2;
+  font-size: 11px;
+  text-transform: capitalize;
 }
 
-/* Form Styles */
-.form-content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+/* Sections */
+.form-section {
+  display: none;
+}
+.form-section.active {
+  display: block;
+  animation: slideIn 0.3s ease-out;
 }
 
+/* Inputs */
 .input-group {
+  margin-bottom: 22px;
   display: flex;
   flex-direction: column;
 }
-
 .input-group label {
   font-size: 13px;
   margin-bottom: 8px;
   color: var(--text-main);
 }
-
 .required {
   color: var(--accent-red);
 }
 
-input {
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"] {
   background-color: var(--input-bg);
   border: none;
   border-bottom: 1px solid #444;
   padding: 12px;
   color: white;
   font-size: 15px;
-  outline: none;
 }
 
-input:focus {
-  border-bottom-color: #666;
-}
-
-/* Specific Field Layouts */
+.password-wrapper,
 .phone-input {
   display: flex;
-  background-color: var(--input-bg);
+  background: var(--input-bg);
   border-bottom: 1px solid #444;
-}
-
-.flag-select {
-  display: flex;
-  align-items: center;
-  padding: 0 10px;
-  gap: 8px;
-  cursor: pointer;
-}
-
-.phone-input input {
-  flex: 1;
-  border-bottom: none;
-}
-
-.password-wrapper {
   position: relative;
-  display: flex;
-  background-color: var(--input-bg);
-  border-bottom: 1px solid #444;
 }
-
-.password-wrapper input {
-  flex: 1;
+.password-wrapper input,
+.phone-input input {
   border-bottom: none;
+  width: 100%;
 }
 
 .toggle-password {
@@ -141,30 +108,63 @@ input:focus {
   right: 15px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--text-muted);
   cursor: pointer;
-  font-size: 14px;
+  color: var(--text-muted);
 }
 
-/* Button */
+.flag-select {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 8px;
+  border-right: 1px solid #333;
+}
+
+/* Terms Box */
+.terms-box {
+  background: #1a1a1a;
+  padding: 20px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #aaa;
+}
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  margin-top: 15px;
+}
+
+/* Buttons */
 .button-container {
   display: flex;
   justify-content: flex-end;
-  margin-top: 10px;
+  margin-top: 30px;
 }
-
 .next-btn {
-  background-color: var(--btn-bg);
-  color: #111;
+  background: var(--btn-bg);
+  color: #000;
   border: none;
   padding: 10px 35px;
   font-weight: bold;
-  border-radius: 3px;
   cursor: pointer;
-  font-size: 14px;
-  transition: background 0.2s;
+  border-radius: 2px;
+}
+.btn-secondary {
+  background: #3a3a3a;
+  color: #fff;
+  margin-right: 10px;
 }
 
-.next-btn:hover {
-  background-color: #777;
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
