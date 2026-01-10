@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     prevBtn.style.display = currentStep === 1 ? "none" : "inline-block";
-    nextBtn.innerText = currentStep === totalSteps ? "SUBMIT" : "NEXT";
+    nextBtn.innerText = currentStep === totalSteps ? "RESISTER" : "NEXT";
   }
 
   // 3. Navigation and Validation
@@ -63,7 +63,57 @@ document.addEventListener("DOMContentLoaded", function () {
         currentStep++;
         updateUI();
       } else {
-        alert("Registration Successful!");
+        // Collect all data from the form
+        const formData = new FormData();
+        formData.append("action", "register_user_action");
+        formData.append("security", document.getElementById("security").value);
+        formData.append(
+          "email",
+          document.querySelector('input[type="email"]').value
+        );
+        formData.append(
+          "first_name",
+          document.querySelector('input[name="first_name"]').value
+        );
+        formData.append(
+          "last_name",
+          document.querySelector('input[name="last_name"]').value
+        );
+        formData.append("password", document.getElementById("main_pwd").value);
+        formData.append(
+          "phone",
+          document.querySelector('input[type="tel"]').value
+        );
+        formData.append(
+          "sponsor",
+          document.querySelector('input[name="sponsor"]').value
+        );
+
+        // Send to WordPress
+        nextBtn.innerText = "PROCESSING...";
+        nextBtn.disabled = true;
+
+        fetch("http://localhost/wp_06/wp-admin/admin-ajax.php", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              document.getElementById(
+                "multi-step-form"
+              ).innerHTML = `<div class="success-msg">${data.data}</div>`;
+            } else {
+              alert("Error: " + data.data);
+              nextBtn.innerText = "SUBMIT";
+              nextBtn.disabled = false;
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            nextBtn.innerText = "SUBMIT";
+            nextBtn.disabled = false;
+          });
       }
     }
   });

@@ -27,15 +27,15 @@ function crf_registration_form_shortcode() {
         <form id="multi-step-form" class="form-content">
             <div class="form-section active" id="section-1">
                 <div class="input-group"><label>Sponsor ID</label><input type="number" name="sponsor"></div>
-                <div class="input-group"><label>First name <span class="required">*</span></label><input type="text" required></div>
-                <div class="input-group"><label>Last name <span class="required">*</span></label><input type="text" required></div>
+                <div class="input-group"><label>First name <span class="required">*</span></label><input name="first_name" type="text" required></div>
+                <div class="input-group"><label>Last name <span class="required">*</span></label><input name="last_name" type="text" required></div>
                 <div class="input-group"><label>E-mail <span class="required">*</span></label><input type="email" required></div>
                 
                 <div class="input-group">
                     <label>Phone <span class="required">*</span></label>
                     <div class="phone-input">
                         <div class="flag-select"><img src="https://flagcdn.com/w20/bd.png" alt="BD"><i class="fas fa-caret-down"></i></div>
-                        <input type="tel" required>
+                        <input name="phone" type="tel" required>
                     </div>
                 </div>
 
@@ -81,8 +81,50 @@ function crf_registration_form_shortcode() {
                 <button type="button" id="prevBtn" class="next-btn btn-secondary" style="display:none;">BACK</button>
                 <button type="button" id="nextBtn" class="next-btn">NEXT</button>
             </div>
+
+            <input type="hidden" name="action" value="register_user_action">
+            <?php wp_nonce_field('registration_nonce', 'security'); ?>
+
         </form>
     </div>
     <?php return ob_get_clean();
 }
 add_shortcode('crf_shortcode', 'crf_registration_form_shortcode');
+
+
+// Handle the AJAX Request
+add_action('wp_ajax_nopriv_register_user_action', 'crf_handle_registration');
+add_action('wp_ajax_register_user_action', 'crf_handle_registration');
+
+function crf_handle_registration() {
+    // 1. Security Check
+    check_ajax_referer('registration_nonce', 'security');
+
+    // 2. Collect and Sanitize Data
+    $email    = sanitize_email($_POST['email']);
+    $first    = sanitize_text_field($_POST['first_name']);
+    $last     = sanitize_text_field($_POST['last_name']);
+    $password = $_POST['password']; // wp_create_user hashes this for us
+    $phone    = sanitize_text_field($_POST['phone']);
+    $sponsor  = sanitize_text_field($_POST['sponsor']);
+
+    // 3. Validation
+    if (email_exists($email)) {
+        wp_send_json_error('This email is already registered.');
+    }
+
+    // 4. Create User
+    $user_id = wp_create_user($email, $password, $email);
+
+    if (is_wp_error($user_id)) {
+        wp_send_json_error($user_id->get_error_message());
+    }
+
+    // 5. Save Extra Meta (Phone and Sponsor)
+    update_user_meta($user_id, 'first_name', $first);
+    update_user_meta($user_id, 'last_name', $last);
+    update_user_meta($user_id, 'phone_number', $phone);
+    update_user_meta($user_id, 'sponsor_id', $sponsor);
+
+    wp_send_json_success('Registration complete! You can now log in.');
+}
