@@ -56,6 +56,18 @@ document.addEventListener("DOMContentLoaded", function () {
       } else {
         errorMsg.style.display = "none";
       }
+
+      const phoneInput = document.querySelector('input[type="tel"]');
+
+      const phoneRegex = /^(01)[3-9]\d{8}$/;
+
+      if (!phoneRegex.test(phoneInput.value)) {
+        alert("Please enter a valid phone number");
+        phoneInput.style.borderColor = "var(--accent-red)";
+        valid = false;
+      } else {
+        phoneInput.style.borderColor = "";
+      }
     }
 
     if (valid) {
@@ -124,4 +136,23 @@ document.addEventListener("DOMContentLoaded", function () {
       updateUI();
     }
   });
+
+  const phoneInput = document.getElementById("user_phone");
+  const phoneError = document.getElementById("phone-error");
+
+  phoneInput.addEventListener("input", function (e) {
+    this.value = this.value.replace(/[^\d+-\s]/g, "");
+  });
+
+  const phonePattern =
+    /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im;
+
+  if (!phonePattern.test(phoneInput.value)) {
+    phoneError.style.display = "block";
+    phoneInput.style.borderBottomColor = "#ff4d4d";
+    valid = false;
+  } else {
+    phoneError.style.display = "none";
+    phoneInput.style.borderBottomColor = "#444";
+  }
 });

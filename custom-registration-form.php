@@ -31,12 +31,18 @@ function crf_registration_form_shortcode() {
                 <div class="input-group"><label>Last name <span class="required">*</span></label><input name="last_name" type="text" required></div>
                 <div class="input-group"><label>E-mail <span class="required">*</span></label><input type="email" required></div>
                 
+
+
                 <div class="input-group">
-                    <label>Phone <span class="required">*</span></label>
-                    <div class="phone-input">
-                        <div class="flag-select"><img src="https://flagcdn.com/w20/bd.png" alt="BD"><i class="fas fa-caret-down"></i></div>
-                        <input name="phone" type="tel" required>
+                <label>Phone <span class="required">*</span></label>
+                <div class="phone-input">
+                    <div class="flag-select">
+                        <img src="https://flagcdn.com/w20/bd.png" alt="BD">
+                        <i class="fas fa-caret-down"></i>
                     </div>
+                        <input type="tel" id="user_phone" name="phone" placeholder="01XXXXXXXXX" required>
+                    </div>
+                    <span id="phone-error" style="color: #ff4d4d; font-size: 11px; margin-top: 5px; display: none;">Please enter a valid phone number</span>
                 </div>
 
                 <div class="input-group">
