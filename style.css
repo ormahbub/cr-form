@@ -168,3 +168,60 @@ input[type="tel"] {
     transform: translateX(0);
   }
 }
+
+/* New code */
+
+/* Success Message Styles */
+.success-msg {
+  text-align: center;
+  padding: 40px 20px;
+  background: #f8fff8;
+  border: 2px solid #4caf50;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.success-msg h3 {
+  color: #4caf50;
+  margin-bottom: 15px;
+}
+
+.success-msg a {
+  color: #2196f3;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.success-msg a:hover {
+  text-decoration: underline;
+}
+
+/* Plan Selection Styling */
+#plan-selection select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+}
+
+/* Admin Sync Page */
+.wrap .card {
+  max-width: 800px;
+}
+
+/* Form Validation */
+input:invalid {
+  border-color: #ff4d4d !important;
+}
+
+input:valid {
+  border-color: #4caf50 !important;
+}
+
+/* Processing State */
+.next-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

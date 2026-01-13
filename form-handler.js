@@ -4,6 +4,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const nextBtn = document.getElementById("nextBtn");
   const prevBtn = document.getElementById("prevBtn");
 
+  // Get AJAX URL from localized script
+  const ajaxUrl = crf_ajax.ajax_url;
+  const ajaxNonce = crf_ajax.nonce;
+
   // 1. Password Visibility Toggle
   document.querySelectorAll(".toggle-password").forEach((icon) => {
     icon.addEventListener("click", function () {
@@ -27,106 +31,98 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     prevBtn.style.display = currentStep === 1 ? "none" : "inline-block";
-    nextBtn.innerText = currentStep === totalSteps ? "RESISTER" : "NEXT";
+    nextBtn.innerText = currentStep === totalSteps ? "REGISTER" : "NEXT";
+
+    // Show plan selection on step 1
+    const planSection = document.getElementById("plan-selection");
+    if (planSection) {
+      planSection.style.display = currentStep === 1 ? "block" : "none";
+    }
   }
 
-  // 3. Navigation and Validation
-  nextBtn.addEventListener("click", () => {
-    const currentSection = document.getElementById(`section-${currentStep}`);
-    const inputs = currentSection.querySelectorAll("input[required]");
+  // 3. Validate Step 1
+  function validateStep1() {
     let valid = true;
 
-    // Basic HTML5 validation
-    inputs.forEach((input) => {
-      if (!input.checkValidity()) {
-        input.reportValidity();
+    // Check required fields
+    const requiredFields = document.querySelectorAll(
+      "#section-1 input[required]"
+    );
+    requiredFields.forEach((field) => {
+      if (!field.value.trim()) {
+        field.reportValidity();
         valid = false;
       }
     });
 
-    // Custom Password Match Check (Only on Step 1)
-    if (currentStep === 1 && valid) {
-      const pwd = document.getElementById("main_pwd").value;
-      const confirm = document.getElementById("confirm_pwd").value;
-      const errorMsg = document.getElementById("pass-error");
+    if (!valid) return false;
 
-      if (pwd !== confirm) {
-        errorMsg.style.display = "block";
-        valid = false;
-      } else {
-        errorMsg.style.display = "none";
-      }
+    // Password match validation
+    const pwd = document.getElementById("main_pwd").value;
+    const confirm = document.getElementById("confirm_pwd").value;
+    const errorMsg = document.getElementById("pass-error");
 
-      const phoneInput = document.querySelector('input[type="tel"]');
+    if (pwd !== confirm) {
+      errorMsg.style.display = "block";
+      return false;
+    } else {
+      errorMsg.style.display = "none";
+    }
 
-      const phoneRegex = /^(01)[3-9]\d{8}$/;
+    // Phone validation for Bangladesh
+    const phoneInput = document.getElementById("user_phone");
+    const phoneError = document.getElementById("phone-error");
+    const phoneRegex = /^(01)[3-9]\d{8}$/;
 
-      if (!phoneRegex.test(phoneInput.value)) {
-        alert("Please enter a valid phone number");
-        phoneInput.style.borderColor = "var(--accent-red)";
-        valid = false;
-      } else {
-        phoneInput.style.borderColor = "";
+    if (!phoneRegex.test(phoneInput.value)) {
+      phoneError.style.display = "block";
+      phoneInput.style.borderColor = "#ff4d4d";
+      return false;
+    } else {
+      phoneError.style.display = "none";
+      phoneInput.style.borderColor = "";
+    }
+
+    // Email validation
+    const emailInput = document.getElementById("user_email");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailInput.value)) {
+      alert("Please enter a valid email address");
+      return false;
+    }
+
+    return true;
+  }
+
+  // 4. Validate other steps
+  function validateStep(step) {
+    if (step === 1) return validateStep1();
+
+    const currentSection = document.getElementById(`section-${step}`);
+    const inputs = currentSection.querySelectorAll("input[required]");
+
+    for (let input of inputs) {
+      if (!input.checkValidity()) {
+        input.reportValidity();
+        return false;
       }
     }
 
-    if (valid) {
-      if (currentStep < totalSteps) {
-        currentStep++;
-        updateUI();
-      } else {
-        // Collect all data from the form
-        const formData = new FormData();
-        formData.append("action", "register_user_action");
-        formData.append("security", document.getElementById("security").value);
-        formData.append(
-          "email",
-          document.querySelector('input[type="email"]').value
-        );
-        formData.append(
-          "first_name",
-          document.querySelector('input[name="first_name"]').value
-        );
-        formData.append(
-          "last_name",
-          document.querySelector('input[name="last_name"]').value
-        );
-        formData.append("password", document.getElementById("main_pwd").value);
-        formData.append(
-          "phone",
-          document.querySelector('input[type="tel"]').value
-        );
-        formData.append(
-          "sponsor",
-          document.querySelector('input[name="sponsor"]').value
-        );
+    return true;
+  }
 
-        // Send to WordPress
-        nextBtn.innerText = "PROCESSING...";
-        nextBtn.disabled = true;
+  // 5. Navigation Handler
+  nextBtn.addEventListener("click", () => {
+    if (!validateStep(currentStep)) {
+      return;
+    }
 
-        fetch("http://localhost/wp_06/wp-admin/admin-ajax.php", {
-          method: "POST",
-          body: formData,
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              document.getElementById(
-                "multi-step-form"
-              ).innerHTML = `<div class="success-msg">${data.data}</div>`;
-            } else {
-              alert("Error: " + data.data);
-              nextBtn.innerText = "SUBMIT";
-              nextBtn.disabled = false;
-            }
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-            nextBtn.innerText = "SUBMIT";
-            nextBtn.disabled = false;
-          });
-      }
+    if (currentStep < totalSteps) {
+      currentStep++;
+      updateUI();
+    } else {
+      // Submit registration
+      submitRegistration();
     }
   });
 
@@ -137,22 +133,86 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // 6. Phone input formatting
   const phoneInput = document.getElementById("user_phone");
-  const phoneError = document.getElementById("phone-error");
-
   phoneInput.addEventListener("input", function (e) {
-    this.value = this.value.replace(/[^\d+-\s]/g, "");
+    this.value = this.value.replace(/[^\d]/g, "").substring(0, 11);
   });
 
-  const phonePattern =
-    /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im;
+  // 7. Registration Submission
+  function submitRegistration() {
+    // Collect all form data
+    const formData = new FormData();
+    formData.append("action", "register_user_action");
+    formData.append(
+      "security",
+      document.querySelector('input[name="security"]').value
+    );
+    formData.append("email", document.getElementById("user_email").value);
+    formData.append(
+      "first_name",
+      document.querySelector('input[name="first_name"]').value
+    );
+    formData.append(
+      "last_name",
+      document.querySelector('input[name="last_name"]').value
+    );
+    formData.append("password", document.getElementById("main_pwd").value);
+    formData.append("phone", document.getElementById("user_phone").value);
+    formData.append(
+      "sponsor",
+      document.querySelector('input[name="sponsor"]').value
+    );
+    formData.append(
+      "membership_plan",
+      document.getElementById("membership_plan").value
+    );
+    formData.append(
+      "terms_agree",
+      document.getElementById("terms_agree").checked ? "1" : "0"
+    );
+    formData.append("email_code", document.getElementById("email_code").value);
+    formData.append("sms_code", document.getElementById("sms_code").value);
 
-  if (!phonePattern.test(phoneInput.value)) {
-    phoneError.style.display = "block";
-    phoneInput.style.borderBottomColor = "#ff4d4d";
-    valid = false;
-  } else {
-    phoneError.style.display = "none";
-    phoneInput.style.borderBottomColor = "#444";
+    // Disable button and show processing
+    nextBtn.innerText = "PROCESSING...";
+    nextBtn.disabled = true;
+
+    // Send AJAX request
+    fetch(ajaxUrl, {
+      method: "POST",
+      body: formData,
+      credentials: "same-origin",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          // Show success message
+          const form = document.getElementById("multi-step-form");
+          form.innerHTML = `
+            <div class="success-msg">
+              <i class="fas fa-check-circle" style="font-size: 48px; color: #4CAF50; margin-bottom: 20px;"></i>
+              <h3>Registration Successful!</h3>
+              <p>${data.data.message}</p>
+              <p>User ID: ${data.data.user_id}</p>
+              <p>URMembership Integration: ${data.data.urm_integration}</p>
+              <p>You can now <a href="${window.location.origin}/wp-login.php">log in</a> to your account.</p>
+            </div>
+          `;
+        } else {
+          alert("Error: " + data.data);
+          nextBtn.innerText = "REGISTER";
+          nextBtn.disabled = false;
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("An error occurred. Please try again.");
+        nextBtn.innerText = "REGISTER";
+        nextBtn.disabled = false;
+      });
   }
+
+  // Initialize UI
+  updateUI();
 });
