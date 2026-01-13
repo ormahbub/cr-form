@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Multi-Step Registration Form Pro
+ * Plugin Name: Custom Registration Form
  * Description: Clean, maintainable 4-step registration form with URMembership integration.
  * Version: 1.4
  * Author: Your Name
